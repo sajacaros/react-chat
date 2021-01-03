@@ -2,12 +2,14 @@ import React, {useRef, useState} from 'react'
 import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form';
 import firebase from '../../firebase';
-
+import md5 from 'md5';
 function RegisterPage() {
   const {register, watch, errors, handleSubmit} = useForm(); //{mode:'onChange'}
   const [errorFromSubmit, setErrorFromSubmit] = useState( "" );
   const [loading, setLoading] = useState(false);
   const password = useRef();
+
+
   password.current = watch('password');
 
   const onSubmit = async (data) => {
@@ -18,6 +20,19 @@ function RegisterPage() {
         .createUserWithEmailAndPassword(data.email, data.password);
     
       console.log(createdUser);
+
+      await createdUser.user.updateProfile({
+        displayName: data.name,
+        photoURL: `http://gravatar.com/avatar/${md5(createdUser.user.email)}?d=identicon`
+      });
+
+      await firebase.database()
+      .ref("users")
+      .child(createdUser.user.uid)
+      .set({
+        displayName: createdUser.user.displayName,
+        image: createdUser.user.photoURL
+      });
     } catch(error) {
       console.log(error);
       setErrorFromSubmit(error.message);
