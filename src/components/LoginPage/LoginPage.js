@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form';
 import firebase from '../../firebase';
@@ -14,14 +14,18 @@ function LoginPage() {
       await firebase
         .auth()
         .signInWithEmailAndPassword(data.email, data.password);
-      } catch(error) {
+    } catch(error) {
       console.log(error);
       setErrorFromSubmit(error.message);
       setTimeout(() => setErrorFromSubmit(''), 5000);
-    } finally {
-      setLoading(false);
     }
   }
+
+  useEffect(() => {
+    return () => {
+      setLoading(false);
+    }
+  }, [loading]);
 
   return (
     <div className="auth-wrapper">
