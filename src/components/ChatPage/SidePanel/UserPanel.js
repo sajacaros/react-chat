@@ -1,14 +1,43 @@
-import React from 'react'
+import React, {useRef} from 'react'
 import {IoIosChatboxes} from 'react-icons/io';
 import DropDown from 'react-bootstrap/Dropdown';
 import Image from 'react-bootstrap/Image'
-import {useSelector} from 'react-redux';
-import firebase from '../../../firebase'
+import {useDispatch, useSelector} from 'react-redux';
+import firebase from '../../../firebase';
+import mime from 'mime-types';
+import {setPhotoURL} from '../../../redux/actions/user_action';
 
 function UserPanel() {
   const user = useSelector(state=>state.user.currentUser);
+  const inputOpenImageRef = useRef();
+  const dispatch = useDispatch();
+
   const handleLogout = ()=> {
     firebase.auth().signOut();
+  }
+  const handleUploadImage = async (event) => {
+    const file = event.target.files[0];
+    if(!file) return ;
+
+    const metadata = {contentType: mime.lookup(file.name)};
+    try {
+      const uploadTaskSnapshot = await firebase.storage().ref()
+        .child(`user_image/${user.uid}`)
+        .put(file, metadata);
+      const downloadURL = await uploadTaskSnapshot.ref.getDownloadURL();
+      console.log("url : ", downloadURL);
+      await firebase.auth().currentUser.updateProfile({photoURL:downloadURL});
+      dispatch(setPhotoURL(downloadURL));
+      await firebase.database().ref("users")
+        .child(user.uid)
+        .update({image:downloadURL});
+    } catch(error) {
+      console.error('Failed to upload snapshot, error : ',error);
+    }
+  }
+
+  const handleOpenImageRef = () => {
+    inputOpenImageRef.current.click();
   }
 
   if (user === null) {
@@ -31,7 +60,7 @@ function UserPanel() {
               {user.displayName}
             </DropDown.Toggle>
             <DropDown.Menu>
-              <DropDown.Item href="#/action-1">
+              <DropDown.Item onClick={handleOpenImageRef}>
                 프로필 사진 변경
               </DropDown.Item>
               <DropDown.Item onClick={handleLogout}>
@@ -40,6 +69,13 @@ function UserPanel() {
             </DropDown.Menu>
           </DropDown>
         </div>
+        <input
+          type="file"
+          accept="image/jpeg, image/png"
+          style={{display: 'none'}}
+          ref={inputOpenImageRef}
+          onChange={handleUploadImage}
+        />
       </div>
     )
   }
