@@ -22,10 +22,11 @@ function ChatRooms() {
 
   useEffect(() => {
     setChatRoomRef(firebase.database().ref("chatRooms"));
-  }, [chatRoomRef]);
+  }, []);
 
   const addChatRoom = async () => {
     if(!chatRoomRef){
+      alert('firebase ref is not initialized');
       return
     }
     const key = chatRoomRef.push().key;
