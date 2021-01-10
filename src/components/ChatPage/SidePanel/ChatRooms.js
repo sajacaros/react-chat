@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { FaRegSmileWink, FaPlus} from 'react-icons/fa';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
@@ -14,12 +14,20 @@ function ChatRooms() {
 
   const [show, setShow] = useState(false);
   const [roomInfo, setRoomInfo] = useState(defaultRoomInfo);
+  const [chatRoomRef, setChatRoomRef] = useState({});
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const user = useSelector(state=>state.user.currentUser);
-  const chatRoomRef = firebase.database().ref("chatRooms");
+  // const chatRoomRef = firebase.database().ref("chatRooms");
+
+  useEffect(() => {
+    setChatRoomRef(firebase.database().ref("chatRooms"));
+  }, [chatRoomRef]);
 
   const addChatRoom = async () => {
+    if(!chatRoomRef){
+      return
+    }
     const key = chatRoomRef.push().key;
     const newChatRoom = {
       id: key,
@@ -73,12 +81,16 @@ function ChatRooms() {
           <Form>
             <Form.Group controlId="formRoomName">
               <Form.Label>방 이름</Form.Label>
-              <Form.Control onChange={e=>setRoomInfo(prev=>({...prev, name:e.target.value}))} name="roomName" type="text" placeholder="Enter a chat room name" />
+              <Form.Control 
+                onChange={e=>setRoomInfo(prev=>({...prev, name:e.target.value}))} 
+                name="roomName" type="text" placeholder="Enter a chat room name" />
             </Form.Group>
 
             <Form.Group controlId="formRoomDescription">
               <Form.Label>방 설명</Form.Label>
-              <Form.Control onChange={e=>setRoomInfo(prev=>({...prev, description:e.target.value}))} name="roomDescription" type="text" placeholder="Enter a chat room description" />
+              <Form.Control 
+                onChange={e=>setRoomInfo(prev=>({...prev, description:e.target.value}))} 
+                name="roomDescription" type="text" placeholder="Enter a chat room description" />
             </Form.Group>
           </Form>
         </Modal.Body>
