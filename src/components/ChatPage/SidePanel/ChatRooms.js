@@ -2,13 +2,51 @@ import React, {useState} from 'react';
 import { FaRegSmileWink, FaPlus} from 'react-icons/fa';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form'
+import Form from 'react-bootstrap/Form';
+import firebase from '../../../firebase';
+import {useSelector} from 'react-redux';
 
 function ChatRooms() {
-  const [show, setShow] = useState(false);
+  const defaultRoomInfo = {
+    name: "",
+    description: ""
+  }
 
+  const [show, setShow] = useState(false);
+  const [roomInfo, setRoomInfo] = useState(defaultRoomInfo);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+  const user = useSelector(state=>state.user.currentUser);
+  const chatRoomRef = firebase.database().ref("chatRooms");
+
+  const addChatRoom = async () => {
+    const key = chatRoomRef.push().key;
+    const newChatRoom = {
+      id: key,
+      name: roomInfo.name,
+      description: roomInfo.description,
+      createdBy: {
+        name: user.displayName,
+        image: user.photoURL
+      }
+    }
+    try {
+      await chatRoomRef.child(key).update(newChatRoom);
+    } catch(err) {
+      alert(err);
+    }
+    setRoomInfo(defaultRoomInfo);
+    setShow(false);
+  }
+
+  const isFormValid = (name, description) => name && description
+
+  const onModalButtonClick = () => {
+    if(isFormValid(roomInfo.name, roomInfo.description)) {
+      addChatRoom();
+    }
+  }
+
 
   return (
     <div>
@@ -26,9 +64,6 @@ function ChatRooms() {
         />
       </div>
 
-      {/* <Button variant="primary" onClick={handleShow}>
-        Launch demo modal
-      </Button> */}
 
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
@@ -36,14 +71,14 @@ function ChatRooms() {
         </Modal.Header>
         <Modal.Body>
           <Form>
-            <Form.Group controlId="formBasicEmail">
+            <Form.Group controlId="formRoomName">
               <Form.Label>방 이름</Form.Label>
-              <Form.Control type="text" placeholder="Enter a chat room name" />
+              <Form.Control onChange={e=>setRoomInfo(prev=>({...prev, name:e.target.value}))} name="roomName" type="text" placeholder="Enter a chat room name" />
             </Form.Group>
 
-            <Form.Group controlId="formBasicPassword">
+            <Form.Group controlId="formRoomDescription">
               <Form.Label>방 설명</Form.Label>
-              <Form.Control type="text" placeholder="Enter a chat room description" />
+              <Form.Control onChange={e=>setRoomInfo(prev=>({...prev, description:e.target.value}))} name="roomDescription" type="text" placeholder="Enter a chat room description" />
             </Form.Group>
           </Form>
         </Modal.Body>
@@ -51,8 +86,8 @@ function ChatRooms() {
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>
-          <Button variant="primary" onClick={handleClose}>
-            Save Changes
+          <Button type="submit" variant="primary" onClick={onModalButtonClick}>
+            Create
           </Button>
         </Modal.Footer>
       </Modal>
