@@ -1,10 +1,10 @@
 import React, {useState, useEffect} from 'react';
-import { FaRegSmileWink, FaPlus} from 'react-icons/fa';
+import { FaRegSmileWink, FaPlus, FaAddressCard} from 'react-icons/fa';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import firebase from '../../../firebase';
-import {useSelector} from 'react-redux';
+import {useSelector, useDispatch} from 'react-redux';
 
 function ChatRooms() {
   const defaultRoomInfo = {
@@ -15,13 +15,22 @@ function ChatRooms() {
   const [show, setShow] = useState(false);
   const [roomInfo, setRoomInfo] = useState(defaultRoomInfo);
   const [chatRoomRef, setChatRoomRef] = useState({});
+  const [chatRooms, setChatRooms] = useState([]);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const user = useSelector(state=>state.user.currentUser);
-  // const chatRoomRef = firebase.database().ref("chatRooms");
-
+  
   useEffect(() => {
-    setChatRoomRef(firebase.database().ref("chatRooms"));
+    const roomRef = firebase.database().ref("chatRooms");
+    setChatRoomRef(roomRef);
+    
+    roomRef.on("child_added", snapshot=> {
+      console.log('child added, snapshot : ', snapshot.val())
+      setChatRooms(prev=>[...prev, snapshot.val()]);    
+    })
+    return () => {
+  
+    }
   }, []);
 
   const addChatRoom = async () => {
@@ -50,6 +59,15 @@ function ChatRooms() {
 
   const isFormValid = (name, description) => name && description
 
+  const renderChatRooms = chatRooms => {
+    if(chatRooms.length) 
+      return chatRooms.map(room=>(
+        <li key={room.id}>
+          # {room.name}
+        </li>
+      ));
+  }
+
   const onModalButtonClick = () => {
     if(isFormValid(roomInfo.name, roomInfo.description)) {
       addChatRoom();
@@ -72,7 +90,9 @@ function ChatRooms() {
         onClick={handleShow}
         />
       </div>
-
+      <ul style={{ listStyleType:'none', padding: 0}}>
+        {renderChatRooms(chatRooms)}
+      </ul>
 
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
