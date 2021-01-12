@@ -39,7 +39,7 @@ function ChatRooms() {
       setChatRooms(prev=>[...prev, snapshot.val()]);
     })
     return () => {
-  
+      roomRef.off();
     }
   }, [changeChatRoom]);
 
