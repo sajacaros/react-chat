@@ -1,10 +1,11 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import { FaRegSmileWink, FaPlus, FaAddressCard} from 'react-icons/fa';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import firebase from '../../../firebase';
 import {useSelector, useDispatch} from 'react-redux';
+import {setCurrentChatRoom} from '../../../redux/actions/chatRoom_action';
 
 function ChatRooms() {
   const defaultRoomInfo = {
@@ -16,22 +17,35 @@ function ChatRooms() {
   const [roomInfo, setRoomInfo] = useState(defaultRoomInfo);
   const [chatRoomRef, setChatRoomRef] = useState({});
   const [chatRooms, setChatRooms] = useState([]);
+  const [neededInit, setNeededInit] = useState(true);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const user = useSelector(state=>state.user.currentUser);
-  
+  const dispatch = useDispatch();
+
+  const changeChatRoom = useCallback(room => dispatch(setCurrentChatRoom(room)), [dispatch]);
+  // const changeChatRoom = room => dispatch(setCurrentChatRoom(room));
+
   useEffect(() => {
     const roomRef = firebase.database().ref("chatRooms");
     setChatRoomRef(roomRef);
     
     roomRef.on("child_added", snapshot=> {
       console.log('child added, snapshot : ', snapshot.val())
-      setChatRooms(prev=>[...prev, snapshot.val()]);    
+      setChatRooms(prev=>[...prev, snapshot.val()]);
     })
     return () => {
   
     }
-  }, []);
+  }, [changeChatRoom]);
+
+  useEffect(()=>{
+    if(neededInit && chatRooms.length > 0) {
+      changeChatRoom(chatRooms[0]);
+      console.log('selected initial chatRoom, room : ', chatRooms[0]);
+      setNeededInit(false);
+    }
+  }, [chatRooms, changeChatRoom, neededInit]);
 
   const addChatRoom = async () => {
     if(!chatRoomRef){
@@ -59,10 +73,15 @@ function ChatRooms() {
 
   const isFormValid = (name, description) => name && description
 
+  
+
   const renderChatRooms = chatRooms => {
     if(chatRooms.length) 
       return chatRooms.map(room=>(
-        <li key={room.id}>
+        <li 
+          key={room.id}
+          onClick={()=>changeChatRoom(room)}
+        >
           # {room.name}
         </li>
       ));
