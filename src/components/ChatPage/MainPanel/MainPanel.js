@@ -6,12 +6,12 @@ export class MainPanel extends Component {
   render() {
     return (
       <div style={{
-        padding: '2rem 2rem 0 2rem'
+        padding: '1rem 2rem 0 2rem'
       }}>
         <MessageHeader />
         <div style={{
           width: '100%',
-          height: '450px',
+          height: '350px',
           border: '.2rem solid #ececec',
           borderRadius: '4px',
           padding: '1rem',
