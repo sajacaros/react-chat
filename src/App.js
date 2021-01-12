@@ -15,10 +15,11 @@ function App() {
   const history = useHistory();
   const dispatch = useDispatch();
   const isLoading= useSelector(state=>state.user.isLoading);
-
+  
   useEffect(() => {
     firebase.auth().onAuthStateChanged(user=>{
       if(user) {
+        console.log(user);
         history.push('/');
         dispatch(setUser(user));
       } else {

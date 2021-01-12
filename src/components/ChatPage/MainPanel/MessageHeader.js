@@ -7,9 +7,13 @@ import Image from 'react-bootstrap/Image';
 import Accordion from 'react-bootstrap/Accordion';
 import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button'
+import { useSelector } from 'react-redux';
 
 
 function MessageHeader() {
+  const currentChatRoom = useSelector(state=>state.chatRoom.currentChatRoom);
+  const user = useSelector(state=>state.user.currentUser);
+
   return (
     <div style={{
       width: '100%',
@@ -21,7 +25,7 @@ function MessageHeader() {
     }}>
       <Container>
         <Row>
-          <Col><FaLock /> ChatRoomName <MdFavorite /></Col>
+          <Col><FaLock /> {currentChatRoom? currentChatRoom.name:'-'} <MdFavorite /></Col>
           <Col>
             <InputGroup className="mb-3">
               <InputGroup.Prepend>
@@ -39,7 +43,7 @@ function MessageHeader() {
         </Row>
         <div style={{ display:'flex', justifyContent: 'flex-end'}}>
           <p>
-            <Image src=""/>{" "}user name
+            <Image src={user? user.photoURL: ''} style={{width:'25px', height:'25px'}}/>{" "}{user?user.displayName:''}
           </p>
         </div>
         <Row>

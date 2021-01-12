@@ -9,6 +9,7 @@ import {setPhotoURL} from '../../../redux/actions/user_action';
 
 function UserPanel() {
   const user = useSelector(state=>state.user.currentUser);
+  // console.log(user);
   const inputOpenImageRef = useRef();
   const dispatch = useDispatch();
 
@@ -57,7 +58,7 @@ function UserPanel() {
             <DropDown.Toggle 
               style={{background: 'transparent', border:'0px'}} 
               id="dropdown-basic">
-              {user.displayName}
+              {user?user.displayName:'-'}
             </DropDown.Toggle>
             <DropDown.Menu>
               <DropDown.Item onClick={handleOpenImageRef}>

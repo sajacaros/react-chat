@@ -18,7 +18,7 @@ function RegisterPage() {
       let createdUser = await firebase
         .auth()
         .createUserWithEmailAndPassword(data.email, data.password);
-    
+      firebase.auth().signOut();
       console.log(createdUser);
 
       await createdUser.user.updateProfile({
@@ -27,12 +27,12 @@ function RegisterPage() {
       });
 
       await firebase.database()
-      .ref("users")
-      .child(createdUser.user.uid)
-      .set({
-        displayName: createdUser.user.displayName,
-        image: createdUser.user.photoURL
-      });
+        .ref("users")
+        .child(createdUser.user.uid)
+        .set({
+          displayName: createdUser.user.displayName,
+          image: createdUser.user.photoURL
+        });
     } catch(error) {
       console.log(error);
       setErrorFromSubmit(error.message);
