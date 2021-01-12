@@ -14,16 +14,16 @@ import { BrowserRouter as Router } from 'react-router-dom';
 const createStoreWithMiddleware = applyMiddleware(promiseMiddleware, ReduxThunk)(createStore)
 
 ReactDOM.render(
-  <React.StrictMode>
-    <Provider store={createStoreWithMiddleware(
-      Reducer,
-      window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
-    )}>
-      <Router>
-        <App />
-      </Router>
-    </Provider>
-  </React.StrictMode>,
+  // <React.StrictMode>
+  <Provider store={createStoreWithMiddleware(
+    Reducer,
+    window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+  )}>
+    <Router>
+      <App />
+    </Router>
+  </Provider>,
+  // </React.StrictMode>,
   document.getElementById('root')
 );
 
