@@ -18,12 +18,16 @@ function ChatRooms() {
   const [chatRoomRef, setChatRoomRef] = useState({});
   const [chatRooms, setChatRooms] = useState([]);
   const [neededInit, setNeededInit] = useState(true);
+  const [activeChatRoomId, setActiveChatRoomId] = useState('');
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const user = useSelector(state=>state.user.currentUser);
   const dispatch = useDispatch();
 
-  const changeChatRoom = useCallback(room => dispatch(setCurrentChatRoom(room)), [dispatch]);
+  const changeChatRoom = useCallback(room => {
+    dispatch(setCurrentChatRoom(room));
+    setActiveChatRoomId(room.id);
+  }, [dispatch]);
   // const changeChatRoom = room => dispatch(setCurrentChatRoom(room));
 
   useEffect(() => {
@@ -81,6 +85,7 @@ function ChatRooms() {
         <li 
           key={room.id}
           onClick={()=>changeChatRoom(room)}
+          style={{backgroundColor: room.id === activeChatRoomId && "#ffffff45"}}
         >
           # {room.name}
         </li>
