@@ -1,9 +1,10 @@
 import React from 'react'
 
-function Message() {
+function Message(props) {
+  console.log(props)
   return (
     <div>
-      Message
+      {props}
     </div>
   )
 }
