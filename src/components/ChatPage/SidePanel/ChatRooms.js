@@ -41,7 +41,7 @@ function ChatRooms() {
     return () => {
       roomRef.off();
     }
-  }, [changeChatRoom]);
+  }, []);
 
   useEffect(()=>{
     if(neededInit && chatRooms.length > 0) {

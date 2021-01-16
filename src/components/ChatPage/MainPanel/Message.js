@@ -4,7 +4,7 @@ function Message(props) {
   console.log(props)
   return (
     <div>
-      {props}
+      {props.message.content}
     </div>
   )
 }

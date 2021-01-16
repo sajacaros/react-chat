@@ -7,29 +7,32 @@ function MessageBody() {
   const [messages, setMessages] = useState([]);
   const [messageLoading, setMessageLoading] = useState(true);
   const [messageRef, setMessageRef] = useState({})
-  const chatRoom = useSelector(state=>state.chatRoom.currentChatRoom);
+  const chatRoom = useSelector(state=>state.chatRoom.currentChatRoom); // 이녀석이 바뀌면 자동 렌더링됨
   const user = useSelector(state=>state.user.currentUser);
   
   const addMessagesListeners = (ref, chatRoomId) => {
     ref
       .child(chatRoomId)
-      .on("child_added", snapshot => {  
+      .on("child_added", snapshot => { 
         setMessages(prev=>[...prev, snapshot.val()]);
         setMessageLoading(false);
       });
   }
 
   useEffect(() => {
-    const ref = firebase.database().ref("meesages");
+    const ref = firebase.database().ref("messages");
     setMessageRef(ref);
+    return ()=>{
+      ref.off();
+    }
   }, [])
 
   useEffect(() => {
-    
     if(chatRoom) {
       addMessagesListeners(messageRef, chatRoom.id);
     }
     return () => {
+      setMessages([]);
     }
   }, [chatRoom, messageRef])
 
@@ -44,7 +47,6 @@ function MessageBody() {
         />
       </div>
     ));
-
   return (    
       <div style={{
         width: '100%',
