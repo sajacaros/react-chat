@@ -41,17 +41,18 @@ function MessageBody() {
     }
   }, [chatRoom, messageRef])
 
-  const renderMessages = messages =>
-    messages.length > 0 && 
-    messages.map(message=>(
-      <div>
-        <Message 
-          key={message.timestamp}
-          message={message}
-          user={user}
-        />
-      </div>
-    ));
+  const renderMessages = messages =>{
+    if(messages.length > 0) {
+      return messages.map(message=>(
+          <Message 
+            key={message.timestamp} 
+            message={message}
+            user={user}
+          />
+      ));
+    } 
+  }
+
   return (    
       <div style={{
         width: '100%',

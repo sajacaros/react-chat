@@ -5,7 +5,7 @@ function Message(props) {
     <div>
       {props.message.content}
     </div>
-  )
+  );
 }
 
 export default Message
