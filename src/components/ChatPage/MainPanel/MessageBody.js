@@ -11,9 +11,11 @@ function MessageBody() {
   const user = useSelector(state=>state.user.currentUser);
   
   const addMessagesListeners = (ref, chatRoomId) => {
+    console.log('add event handler, room : ', chatRoomId);
     ref
       .child(chatRoomId)
       .on("child_added", snapshot => { 
+        console.log('child_added called, snapshot!! : ', snapshot.val());
         setMessages(prev=>[...prev, snapshot.val()]);
         setMessageLoading(false);
       });
@@ -33,6 +35,9 @@ function MessageBody() {
     }
     return () => {
       setMessages([]);
+      if(chatRoom) {
+        messageRef.child(chatRoom.id).off("child_added");
+      }
     }
   }, [chatRoom, messageRef])
 

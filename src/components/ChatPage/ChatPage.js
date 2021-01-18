@@ -4,7 +4,6 @@ import MainPanel from './MainPanel/MainPanel';
 
 
 function ChatPage() {
-  console.log("999999")
   return (
     <div style={{display:'flex'}}>
       <div style={{width:'300px'}}>

@@ -51,6 +51,7 @@ function MessageForm() {
       setErrors([]);
       setContent('');
       setLoading(false);
+      console.log('message input submit!!, content : ', content);
     } catch(error) {
       console.error(error);
       setErrors(prev=> prev.concat(error));
