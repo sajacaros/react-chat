@@ -1,10 +1,11 @@
-import React, {useState,useEffect} from 'react'
+import React, {useState,useEffect, useRef} from 'react'
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form'
 import ProgressBar from 'react-bootstrap/ProgressBar';
 import firebase from '../../../firebase';
 import {useSelector} from 'react-redux';
+import mime from 'mime-types';
 
 function MessageForm() {
   const currentChatRoom = useSelector(state=>state.chatRoom.currentChatRoom);
@@ -13,6 +14,46 @@ function MessageForm() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState([]);
   const [messageRef, setMessageRef] = useState({});
+  const inputOpenImageRef = useRef()
+  const [percentage, setPercentage] = useState(0);
+  const [storageRef, setStorageRef] = useState({});
+
+  const handleOpenImage = () => {
+    inputOpenImageRef.current.click()
+  }
+
+  const handleUploadImage = async (event) => {
+    const file = event.target.files[0];
+    if(!file) return;
+    setLoading(true);
+    const filePath = `message/public/${file.name}`;
+    const metadata = {contentType: mime.lookup(file.name)};
+    const uploadTask = storageRef.child(filePath).put(file, metadata);
+
+    try {
+      console.log('upload, filePath : ', filePath);
+      await uploadTask
+        .on("state_changed", uploadTaskSnapshot=>{
+          const percentage = Math.round(
+            (uploadTaskSnapshot.bytesTransferred / uploadTaskSnapshot.totalBytes)*100
+          );
+          setPercentage(percentage);
+        },
+        err=>{
+          console.error(err);
+        },
+        async () => {
+          const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+          messageRef.child(currentChatRoom.id).push().set(createMessage(downloadURL))
+        });
+      console.log('uploaded');
+    } catch(err) {
+      alert(err);
+    }finally{
+      setLoading(false);
+    }
+
+  }
 
   const createMessage = (fileUrl = null) => {
     const message = {
@@ -34,6 +75,11 @@ function MessageForm() {
   useEffect(() => {
     const messageRef = firebase.database().ref("messages");
     setMessageRef(messageRef);
+  }, [])
+
+  useEffect(() => {
+    const storageRef = firebase.storage().ref();
+    setStorageRef(storageRef);
   }, [])
 
   const handleSubmit = async () => {
@@ -78,7 +124,10 @@ function MessageForm() {
           />
         </Form.Group>
       </Form>
-      <ProgressBar variant="warning" label="60%" now={60} />
+      {
+        !(percentage===0 || percentage===100) &&
+        <ProgressBar variant="warning" label={`${percentage}`} now={percentage} />
+      }
       <div>
         {
           errors.map(errorMsg=>
@@ -105,11 +154,13 @@ function MessageForm() {
             className="message-form-button"
             style={{width:'100%'}}
             disabled={loading}
+            onClick={handleOpenImage}
           >
             Upload
           </button>
         </Col>
       </Row>
+      <input accept="image/jpeg, image/png" style={{display:'none'}} type="file" ref={inputOpenImageRef} onChange={handleUploadImage} />
     </div>
   )
 }
