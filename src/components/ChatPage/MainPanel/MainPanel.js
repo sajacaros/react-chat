@@ -6,15 +6,19 @@ import MessageBody from './MessageBody'
 
 function MainPanel() {
   const [searchTerm, setSearchTerm] =  useState("");
-  const [searchResults, setSearchResults] =  useState([]);
   const [searchLoading, setSearchLoading] =  useState(false);
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+    setSearchLoading(true);
+  }
 
   return (
     <div style={{
       padding: '1rem 2rem 0 2rem'
     }}>
-      <MessageHeader />
-      <MessageBody />
+      <MessageHeader handleSearchChange={handleSearchChange}/>
+      <MessageBody searchTerm={searchTerm} />
       <MessageForm />
     </div>
   )

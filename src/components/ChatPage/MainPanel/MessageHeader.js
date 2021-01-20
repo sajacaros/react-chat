@@ -10,7 +10,7 @@ import Button from 'react-bootstrap/Button'
 import { useSelector } from 'react-redux';
 
 
-function MessageHeader() {
+function MessageHeader({handleSearchChange}) {
   const currentChatRoom = useSelector(state=>state.chatRoom.currentChatRoom);
   const user = useSelector(state=>state.user.currentUser);
 
@@ -37,6 +37,7 @@ function MessageHeader() {
                 placeholder="Search Messages"
                 aria-label="Search"
                 aria-describedby="basic-addon1"
+                onChange={handleSearchChange}
               />
             </InputGroup>
           </Col>

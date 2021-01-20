@@ -3,13 +3,31 @@ import { useSelector } from 'react-redux';
 import firebase from '../../../firebase';
 import Message from './Message';
 
-function MessageBody() {
+function MessageBody({searchTerm}) {
   const [messages, setMessages] = useState([]);
   const [messageLoading, setMessageLoading] = useState(true);
   const [messageRef, setMessageRef] = useState({})
+  const [searchResults, setSearchResults] =  useState([]);
   const chatRoom = useSelector(state=>state.chatRoom.currentChatRoom); // 이녀석이 바뀌면 자동 렌더링됨
   const user = useSelector(state=>state.user.currentUser);
   
+  useEffect(() => {
+    if(!searchTerm) {
+      return;
+    }
+    const regex = new RegExp(searchTerm, "gi");
+    const results = messages.reduce((acc, message)=>{
+      if( (message.content && message.content.match(regex)) || message.user.name.match(regex)) {
+        console.log('match');
+        acc.push(message);
+      }
+      return acc;
+    }, []);
+    setSearchResults(results);
+    return () => {
+    }
+  }, [searchTerm, messages]);
+
   const addMessagesListeners = (ref, chatRoomId) => {
     console.log('add event handler, room : ', chatRoomId);
     ref
@@ -63,7 +81,7 @@ function MessageBody() {
         marginBottom: '1rem',
         overflowY: 'auto'
       }}>
-        {renderMessages(messages)}
+        {searchTerm? renderMessages(searchResults):renderMessages(messages)}
       </div>
     
   )
