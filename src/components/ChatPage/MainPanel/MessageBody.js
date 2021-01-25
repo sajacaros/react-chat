@@ -33,7 +33,7 @@ function MessageBody({searchTerm}) {
     ref
       .child(chatRoomId)
       .on("child_added", snapshot => { 
-        console.log('child_added called, snapshot!! : ', snapshot.val());
+        // console.log('child_added called, snapshot!! : ', snapshot.val());
         setMessages(prev=>[...prev, snapshot.val()]);
         setMessageLoading(false);
       });
