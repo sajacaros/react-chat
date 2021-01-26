@@ -5,7 +5,7 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import firebase from '../../../firebase';
 import {useSelector, useDispatch} from 'react-redux';
-import {setCurrentChatRoom} from '../../../redux/actions/chatRoom_action';
+import {setCurrentChatRoom, setPrivateChatRoom} from '../../../redux/actions/chatRoom_action';
 
 function ChatRooms() {
   const defaultRoomInfo = {
@@ -23,12 +23,13 @@ function ChatRooms() {
   const handleShow = () => setShow(true);
   const user = useSelector(state=>state.user.currentUser);
   const dispatch = useDispatch();
-
+  const isPrivateChatRoom = useSelector(state=>state.chatRoom.isPrivateChatRoom);
+  
   const changeChatRoom = useCallback(room => {
     dispatch(setCurrentChatRoom(room));
+    dispatch(setPrivateChatRoom(false));
     setActiveChatRoomId(room.id);
   }, [dispatch]);
-  // const changeChatRoom = room => dispatch(setCurrentChatRoom(room));
 
   useEffect(() => {
     const roomRef = firebase.database().ref("chatRooms");
@@ -85,7 +86,7 @@ function ChatRooms() {
         <li 
           key={room.id}
           onClick={()=>changeChatRoom(room)}
-          style={{backgroundColor: room.id === activeChatRoomId && "#ffffff45"}}
+          style={{backgroundColor: !isPrivateChatRoom && room.id === activeChatRoomId && "#ffffff45"}}
         >
           # {room.name}
         </li>

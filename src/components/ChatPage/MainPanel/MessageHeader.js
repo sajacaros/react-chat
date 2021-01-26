@@ -1,6 +1,6 @@
 import React from 'react'
 import { Row, Col, Container, InputGroup, FormControl } from 'react-bootstrap'
-import { FaLock } from 'react-icons/fa'
+import { FaLock, FaUnlock } from 'react-icons/fa'
 import { MdFavorite } from 'react-icons/md'
 import { AiOutlineSearch } from 'react-icons/ai';
 import Image from 'react-bootstrap/Image';
@@ -13,6 +13,7 @@ import { useSelector } from 'react-redux';
 function MessageHeader({handleSearchChange}) {
   const currentChatRoom = useSelector(state=>state.chatRoom.currentChatRoom);
   const user = useSelector(state=>state.user.currentUser);
+  const isPrivateChatRoom = useSelector(state=>state.chatRoom.isPrivateChatRoom);
 
   return (
     <div style={{
@@ -25,7 +26,7 @@ function MessageHeader({handleSearchChange}) {
     }}>
       <Container>
         <Row>
-          <Col><FaLock /> {currentChatRoom? currentChatRoom.name:'-'} <MdFavorite /></Col>
+          <Col>{isPrivateChatRoom?<FaLock />:<FaUnlock />} {currentChatRoom? currentChatRoom.name:'-'} <MdFavorite /></Col>
           <Col>
             <InputGroup className="mb-3">
               <InputGroup.Prepend>

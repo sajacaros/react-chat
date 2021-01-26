@@ -10,6 +10,7 @@ import mime from 'mime-types';
 function MessageForm() {
   const currentChatRoom = useSelector(state=>state.chatRoom.currentChatRoom);
   const user = useSelector(state=>state.user.currentUser);
+  const isPrivateChatRoom = useSelector(state=>state.chatRoom.isPrivateChatRoom);
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState([]);
@@ -17,6 +18,14 @@ function MessageForm() {
   const inputOpenImageRef = useRef()
   const [percentage, setPercentage] = useState(0);
   const [storageRef, setStorageRef] = useState({});
+
+  const getPath=() => {
+    if(isPrivateChatRoom) {
+      return `/message/private/${currentChatRoom.id}`;
+    } else {
+      return `/message/public`;
+    }
+  }
 
   const handleOpenImage = () => {
     inputOpenImageRef.current.click()
@@ -26,7 +35,7 @@ function MessageForm() {
     const file = event.target.files[0];
     if(!file) return;
     setLoading(true);
-    const filePath = `message/public/${file.name}`;
+    const filePath = `${getPath()}/${file.name}`;
     const metadata = {contentType: mime.lookup(file.name)};
     const uploadTask = storageRef.child(filePath).put(file, metadata);
 
