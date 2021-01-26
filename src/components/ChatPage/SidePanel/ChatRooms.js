@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useCallback} from 'react';
-import { FaRegSmileWink, FaPlus, FaAddressCard} from 'react-icons/fa';
+import { FaRegSmileWink, FaPlus} from 'react-icons/fa';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';

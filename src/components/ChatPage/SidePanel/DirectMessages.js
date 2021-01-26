@@ -5,25 +5,33 @@ import {useSelector} from 'react-redux';
 
 function DirectMessages() {
 
-  const usersRef = firebase.database().ref("users");
   const user = useSelector(state=>state.user.currentUser);
+  const [usersRef, setUsersRef] = useState(null);
   const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    if(!usersRef) setUsersRef(firebase.database().ref("users"));
+    return () => {
+      if(usersRef) usersRef.off("child_added");
+    }
+  }, [usersRef]);
 
   const addUsersListeners = useCallback(
     (currentUserUid) => {
-      usersRef.on("child_added", snapshot=>{
-        if(currentUserUid !== snapshot.key) {
-          console.log('direct_chat added');
-          const newUser = snapshot.val();
-          newUser['uid'] = snapshot.key;
-          newUser['status'] = "offline";
-          setUsers(prev=>[...prev, newUser]);
-        }
-      })
+      if(usersRef) {
+        usersRef.on("child_added", snapshot=>{
+          if(currentUserUid !== snapshot.key) {
+            console.log('direct_chat added');
+            const newUser = snapshot.val();
+            newUser['uid'] = snapshot.key;
+            newUser['status'] = "offline";
+            setUsers(prev=>[...prev, newUser]);
+          }
+        })
+      }
     },
     [usersRef],
   );
-
 
   useEffect(() => {
     if(user) {
@@ -32,15 +40,13 @@ function DirectMessages() {
     }
     return () => {
       setUsers([]);
-      usersRef.off("child_added");
-      
     }
-  }, [user, usersRef, addUsersListeners]);
+  }, [user, addUsersListeners]);
 
-  const renderDirectMessages = () => {
-    users.length > 0 &&
+  const renderDirectMessages = (users) => {
+    return users.length > 0 &&
     users.map(u=>(
-      <li key={u.uid}># {u.name}</li>
+      <li key={u.uid}># {u.displayName}</li>
     ));
   }
 
@@ -51,7 +57,7 @@ function DirectMessages() {
         <FaRegSmile style={{ marginRight: 3}} /> Direct Messages(1)
       </span>
       <ul style={{ listStyleType: 'none', padding: 0}}>
-        {renderDirectMessages()}
+        {renderDirectMessages(users)}
       </ul>
     </div>
   )
