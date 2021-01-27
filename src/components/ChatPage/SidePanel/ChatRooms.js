@@ -6,6 +6,7 @@ import Form from 'react-bootstrap/Form';
 import firebase from '../../../firebase';
 import {useSelector, useDispatch} from 'react-redux';
 import {setCurrentChatRoom, setPrivateChatRoom} from '../../../redux/actions/chatRoom_action';
+import Badge from 'react-bootstrap/Badge';
 
 function ChatRooms() {
   const defaultRoomInfo = {
@@ -15,13 +16,16 @@ function ChatRooms() {
 
   const [show, setShow] = useState(false);
   const [roomInfo, setRoomInfo] = useState(defaultRoomInfo);
-  const [chatRoomRef, setChatRoomRef] = useState({});
+  const [chatRoomsRef, setChatRoomsRef] = useState(null);
+  const [messagesRef, setMessagesRef] = useState(null);
   const [chatRooms, setChatRooms] = useState([]);
   const [neededInit, setNeededInit] = useState(true);
   const [activeChatRoomId, setActiveChatRoomId] = useState('');
+  const [notifications, setNotifications] = useState([]);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const user = useSelector(state=>state.user.currentUser);
+  const [chatRoom, setChatRoom] = useState(null);
   const dispatch = useDispatch();
   const isPrivateChatRoom = useSelector(state=>state.chatRoom.isPrivateChatRoom);
   
@@ -29,18 +33,37 @@ function ChatRooms() {
     dispatch(setCurrentChatRoom(room));
     dispatch(setPrivateChatRoom(false));
     setActiveChatRoomId(room.id);
-  }, [dispatch]);
+    setChatRoom(room);
+  }, [dispatch, chatRoom]);
+
+  const addNotificationListener = chatRoomId=> {
+    chatRoomsRef.child(chatRoomId).on("value", snapshot=>{
+      if(chatRoom) {
+        console.log('snapshot : ', snapshot);
+        handleNotifications(chatRoomId, chatRoom.id, notifications, snapshot);
+      }
+    })
+  }
 
   useEffect(() => {
     const roomRef = firebase.database().ref("chatRooms");
-    setChatRoomRef(roomRef);
+    setChatRoomsRef(roomRef);
     
     roomRef.on("child_added", snapshot=> {
       console.log('child added, snapshot : ', snapshot.val())
       setChatRooms(prev=>[...prev, snapshot.val()]);
+      addNotificationListener(snapshot.key);
     })
     return () => {
       roomRef.off();
+    }
+  }, []);
+
+  useEffect(() => {
+    const messagesRef = firebase.database().ref("chatRooms");
+    setMessagesRef(messagesRef);
+    
+    return () => {
     }
   }, []);
 
@@ -53,11 +76,11 @@ function ChatRooms() {
   }, [chatRooms, changeChatRoom, neededInit]);
 
   const addChatRoom = async () => {
-    if(!chatRoomRef){
+    if(!chatRoomsRef){
       alert('firebase ref is not initialized');
       return
     }
-    const key = chatRoomRef.push().key;
+    const key = chatRoomsRef.push().key;
     const newChatRoom = {
       id: key,
       name: roomInfo.name,
@@ -68,7 +91,7 @@ function ChatRooms() {
       }
     }
     try {
-      await chatRoomRef.child(key).update(newChatRoom);
+      await chatRoomsRef.child(key).update(newChatRoom);
     } catch(err) {
       alert(err);
     }
@@ -89,6 +112,9 @@ function ChatRooms() {
           style={{backgroundColor: !isPrivateChatRoom && room.id === activeChatRoomId && "#ffffff45"}}
         >
           # {room.name}
+          <Badge style={{float: 'right', marginTop: '4px'}} variant="danger">
+            1
+          </Badge>
         </li>
       ));
   }
